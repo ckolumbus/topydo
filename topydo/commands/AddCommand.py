@@ -56,6 +56,15 @@ class AddCommand(WriteCommand):
 
         return todos
 
+    def _get_and_incr_next_id(self):
+        filename = config().auto_id_file()
+        with open(filename, 'r') as f:
+            id = int(f.readline().strip())
+        next_id = id+1
+        with open(filename, 'w') as f:
+            f.write(str(next_id))
+        return id
+
     def _add_todo(self, p_todo_text):
         def _preprocess_input_todo(p_todo_text):
             """
@@ -74,6 +83,10 @@ class AddCommand(WriteCommand):
 
         if config().auto_creation_date():
             todo.set_creation_date(date.today())
+
+        if config().auto_id_file():
+            id = self._get_and_incr_next_id()
+            todo.set_tag('id', str(id))
 
         self.out(self.printer.print_todo(todo))
 

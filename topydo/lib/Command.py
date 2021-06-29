@@ -74,11 +74,11 @@ class Command(object):
         except IndexError as ie:
             raise InvalidCommandArgument from ie
 
-    def getopt(self, p_flags, p_long=None):
+    def getopt(self, p_flags, p_long=None, p_skipargs=0):
         p_long = p_long or []
 
         try:
-            result = getopt.getopt(self.args, p_flags, p_long)
+            result = getopt.getopt(self.args[p_skipargs:], p_flags, p_long)
         except getopt.GetoptError as goe:
             self.error(str(goe))
             result = ([], self.args)

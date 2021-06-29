@@ -18,12 +18,14 @@ import configparser
 import os
 import re
 import shlex
+from datetime import date
 from collections import OrderedDict
 from functools import lru_cache
 from itertools import accumulate
 from string import ascii_lowercase
 
 from topydo.lib.Color import Color
+from topydo.lib.TodoDirInfo import TodoDirInfo
 
 
 def home_config_path(p_filename):
@@ -74,10 +76,15 @@ class _Config:
                 'identifier_alphabet': '0123456789abcdefghijklmnopqrstuvwxyz',
                 'backup_count': '5',
                 'auto_delete_whitespace': '1',
+                'tmsa_mode': '0',
+                'keep_ids': '1',
+                'tododir': 'todos',
+                'todofile_fmt': r"todo_{}.txt"
             },
 
             'add': {
                 'auto_creation_date': '1',
+                'auto_id_file': '',
             },
 
             'ls': {
@@ -245,7 +252,36 @@ class _Config:
         return 0 if not forced and not p_hint_possible else colors
 
     def todotxt(self):
-        return os.path.expanduser(self.cp.get('topydo', 'filename'))
+        if self.tmsamode():
+            # TODO: migrate to config file
+            file = TodoDirInfo(self.tododir(), self.todofile_fmt()).get_fullpath_for_date(date.today())
+            return file
+        else:
+            return os.path.expanduser(self.cp.get('topydo', 'filename'))
+
+    def tododir(self):
+        try:
+            return self.cp.get('topydo', 'tododir')
+        except ValueError:
+            return self.defaults['topydo']['tododir']
+
+    def todofile_fmt(self):
+        try:
+            return self.cp.get('topydo', 'todofile_fmt')
+        except ValueError:
+            return self.defaults['topydo']['todofile_fmt']
+
+    def tmsamode(self):
+        try:
+            return self.cp.getboolean('topydo', 'tmsa_mode')
+        except ValueError:
+            return self.defaults['topydo']['tmsa_mode'] == '1'
+
+    def keep_ids(self):
+        try:
+            return self.cp.getboolean('topydo', 'keep_ids') or self.auto_id_file()
+        except ValueError:
+            return self.defaults['topydo']['keep_ids'] == '1'
 
     def archive(self):
         return os.path.expanduser(self.cp.get('topydo', 'archive_filename'))
@@ -407,6 +443,12 @@ class _Config:
             return self.cp.getboolean('add', 'auto_creation_date')
         except ValueError:
             return self.defaults['add']['auto_creation_date'] == '1'
+    
+    def auto_id_file(self):
+        try:
+            return self.cp.get('add', 'auto_id_file')
+        except ValueError:
+            return None
 
     @lru_cache(maxsize=1)
     def aliases(self):

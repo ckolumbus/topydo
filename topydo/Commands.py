@@ -43,6 +43,7 @@ SUBCOMMAND_MAP = {
     'rm': 'DeleteCommand',
     'sort': 'SortCommand',
     'tag': 'TagCommand',
+    'tmsa': 'TmsaCommand',
 }
 
 def get_subcommand(p_args):

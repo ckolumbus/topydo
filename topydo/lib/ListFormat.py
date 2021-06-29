@@ -134,6 +134,21 @@ def color_block(p_todo):
 class ListFormatError(Exception):
     pass
 
+def try_tmsa_filedate(t):
+    try:
+        retval = t.file_date().isoformat()
+    except:
+        retval = ''
+
+    return retval
+
+def try_tmsa_filenumber(t):
+    try:
+        retval = str(t.file_number())
+    except:
+        retval = ''
+
+    return retval
 
 class ListFormatParser(object):
     """ Parser of format string. """
@@ -153,6 +168,12 @@ class ListFormatParser(object):
 
             # relative due date
             'D': lambda t: humanize_date(t.due_date()) if t.due_date() else '',
+
+            # tmsa file date (if enabled)
+            'f': lambda t: try_tmsa_filedate(t),
+
+            # todo line number relative to date based file
+            'F': lambda t: try_tmsa_filenumber(t),
 
             # relative dates:  due, start
             'h': lambda t: humanize_dates(t.due_date(), t.start_date()),

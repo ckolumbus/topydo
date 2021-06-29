@@ -25,7 +25,7 @@ import sys
 from topydo.lib.Color import AbstractColor, Color
 from topydo.lib.TopydoString import TopydoString
 
-MAIN_OPTS = "ac:C:d:ht:v"
+MAIN_OPTS = "ac:C:d:ht:vDT"
 MAIN_LONG_OPTS = ('version')
 READ_ONLY_COMMANDS = ('list', 'listcontext', 'listproject')
 
@@ -46,6 +46,7 @@ GENERIC_HELP="""Available commands:
 * revert
 * sort
 * tag
+* tmsa
 
 Run `topydo help <subcommand>` for command-specific help.\
 """
@@ -65,6 +66,7 @@ Synopsis: topydo [-a] [-c <config>] [-C <colormode>] [-d <archive>] [-t <todo.tx
 -d : Specify an alternative archive file (done.txt)
 -h : This help text
 -t : Specify an alternative todo file
+-T : TMSA mode: operating on date based todo files
 -v : Print version and exit
 
 """ + GENERIC_HELP)
@@ -206,6 +208,8 @@ class CLIApplicationBase(object):
                 overrides[('topydo', 'filename')] = value
             elif opt == "-d":
                 overrides[('topydo', 'archive_filename')] = value
+            elif opt == "-T":
+                overrides[('topydo', 'tmsa_mode')] = '1'
             elif opt in ("-v", "--version"):
                 version()
             else:
@@ -259,6 +263,7 @@ class CLIApplicationBase(object):
         Execute a subcommand with arguments. p_command is a class (not an
         object).
         """
+        
         self._backup(p_command, p_args)
 
         command = p_command(

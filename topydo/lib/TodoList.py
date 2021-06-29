@@ -223,7 +223,8 @@ class TodoList(TodoListBase):
             p_to_todo.remove_tag('p', dep_id)
 
             if not self.children(p_from_todo, True):
-                p_from_todo.remove_tag('id')
+                if not config().keep_ids():
+                    p_from_todo.remove_tag('id')
                 del self._parentdict[dep_id]
 
     @_needs_dependencies
@@ -270,7 +271,8 @@ class TodoList(TodoListBase):
             for todo in [todo for todo in self._todos if todo.has_tag('id')]:
                 value = todo.tag_value('id')
                 if not self._depgraph.has_edge_id(value):
-                    remove_tag(todo, 'id', value)
+                    if not config().keep_ids():
+                        remove_tag(todo, 'id', value)
                     del self._parentdict[value]
 
         def clean_orphan_relations():
